@@ -131,13 +131,13 @@ else:
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_HOST_USER = 'avoy.costa633@gmail.com'
-EMAIL_HOST_PASSWORD = 'a19fuckyougirl'
+EMAIL_HOST = 'mail.demo.excellentworld.xyz'
+EMAIL_HOST_USER = 'ems@demo.excellentworld.xyz'
+EMAIL_HOST_PASSWORD = 'SJ!20v.1vE3vuH'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-DEFAULT_FROM_EMAIL = 'EMS <avoy.costa633@gmail.com>'
+EMAIL_USE_SSL = False
+DEFAULT_FROM_EMAIL = 'no replay <ems@demo.excellentworld.xyz>'
 
 
 
