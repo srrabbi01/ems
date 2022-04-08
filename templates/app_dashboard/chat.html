@@ -1,0 +1,250 @@
+{% extends 'app_dashboard/base.html' %}
+{% load static %}
+{% load customtags %}
+{% block title %}Create Service Request{% endblock title %}
+{% block content %}
+<div class="container-fluid mt-5">
+    <div class="bg-white chat-container row rounded">
+        <div class="col-lg-4 bg-white p-3 h-100 border-end col-12">
+            <div class="row p-2 mb-1">
+                <div class="col-12 border-bottom">
+                    <h4>Assigned Services</h4>
+                </div>
+            </div>
+            <!-- member list -->
+            <ul class="friend-list list-group-flush nav" role="tablist">
+                {% for obj in service_qs %}
+                <li class="list-group-item">
+                    <a href="?ticket={{obj.id}}" data-service-id="{{obj.id}}" class="friend">
+                        <img src="https://bootdey.com/img/Content/user_1.jpg" alt="" class="img-circle">
+                        <div class="friend-name text-c-blue">
+                            <span>{{obj.title}}</span>
+                        </div>
+                        <div class="last-message text-muted">Hello, Are you there?</div>
+                        <small class="time text-muted">{{obj.created_at}}</small>
+                        {% if obj.status == 'closed' %}
+                        <small class="chat-alert label bg-c-red rounded">closed</small>
+                        {% else %}
+                        <small class="chat-alert label bg-c-green rounded">open</small>
+                        {% endif %}
+                    </a>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <!--=========================================================-->
+        <!-- selected chat -->
+        <div class="col-lg-8 bg-white p-0 h-100 tab-content col-12">
+            {% if service_qs %}
+            {% for obj in service_qs %}
+            <ul class="chat tab-pane fade" id="service{{obj.id}}" role="tabpanel">
+                {% if message_qs %}
+                {% for message in message_qs %}
+                <li class="{% if message.user == request.user.userregistration %} right {% else %} left {% endif %}
+                    clearfix">
+                    <span class="chat-img">
+                        <img src="https://bootdey.com/img/Content/user_3.jpg" alt="User Avatar">
+                    </span>
+                    <div class="chat-body clearfix">
+                        <div class="header">
+                            <span class="text-c-blue">{% if message.user == request.user.userregistration %}
+                                Me {% elif  message.user.get_role == 'customer' %} Customer
+                                {% else %}
+                                Technician {% endif %}</span>
+                            <small class="text-muted date"><i
+                                    class="fa fa-clock-o"></i>{{message.sent_date|date:"c"}}</small>
+                        </div>
+                        <p>
+                            {{message.message}}
+                        </p>
+                    </div>
+                </li>
+                {% endfor %}
+                {% else %}
+                <h3 class="empty-chat-txt">Start conversation here</h3>
+                {% endif %}
+            </ul>
+            {% endfor %}
+            {% else %}
+            <ul class="chat h-100 tab-pane fade" id="service{{obj.id}}" role="tabpanel">
+                <h2>No work</h2>
+            </ul>
+            {% endif %}
+            <form class="chat-box" method="post" id="chat_form">
+                {% csrf_token %}
+                <div class="input-group">
+                    <input class="form-control border no-shadow no-rounded" placeholder="Type your message here"
+                        name="chat_field">
+                    <span class="input-group-btn">
+                        <input class="btn btn-primary no-rounded" type="submit" value="Send" />
+                    </span>
+                </div><!-- /input-group -->
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+{% block script %}
+<script>
+    const MONTH_NAMES = [
+        'January', 'February', 'March', 'April', 'May', 'June',
+        'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+
+    function getFormattedDate(date, prefomattedDate = false, hideYear = false) {
+        const day = date.getDate();
+        const month = MONTH_NAMES[date.getMonth()];
+        const year = date.getFullYear();
+        const hours = date.getHours();
+        let minutes = date.getMinutes();
+
+        if (minutes < 10) {
+            // Adding leading zero to minutes 
+            minutes = `0${minutes}`;
+        }
+        if (prefomattedDate) {
+            // Today at 10:20 // Yesterday at 10:20 
+            return `${prefomattedDate} at ${hours}:${minutes}`;
+        }
+        if (hideYear) {
+            // 10. January at 10: 20
+            return `${day}. ${month} at ${hours}:${minutes}`;
+        }
+        // 10. January 2017. at 10:20 return
+        `${day}. ${month} ${year}. at ${hours}:${minutes}`;
+    }
+
+    // --- Main function 
+    function timeAgo(dateParam) {
+        if (!dateParam) {
+            return null;
+        }
+        const date = typeof dateParam === 'object' ? dateParam : new Date(dateParam);
+        const DAY_IN_MS = 86400000; // 24 * 60 * 60 * 1000 
+        const today = new Date();
+        const yesterday = new Date(today - DAY_IN_MS);
+        const seconds = Math.round((today - date) / 1000);
+        const minutes = Math.round(seconds / 60);
+        const isToday = today.toDateString() === date.toDateString();
+        const isYesterday = yesterday.toDateString() === date.toDateString();
+        const isThisYear = today.getFullYear() === date.getFullYear();
+        if (seconds < 5) {
+            return 'now';
+        } else if (seconds < 60) {
+            return `${seconds} seconds ago`;
+        } else if (seconds < 90) {
+            return 'about a minute ago';
+        } else if (minutes < 60) {
+            return `${minutes} minutes ago`;
+        } else if (isToday) {
+            return getFormattedDate(date, 'Today'); // Today at 10:20 
+        } else if (isYesterday) {
+            return getFormattedDate(date, 'Yesterday'); // Yesterday at 10:20 
+        } else if (isThisYear) {
+            return getFormattedDate(date, false, true); // 10. January at 10:20 
+        } else {
+            return getFormattedDate(date); // 10. January 2017. at 10: 20
+        }
+    }
+
+    sentDates = document.querySelectorAll('.date')
+    sentDates.forEach(item => {
+        dateStr = item.textContent.replace(/\s/g, '')
+        item.textContent = timeAgo(dateStr)
+    });
+</script>
+<script>
+    let friendList = document.querySelectorAll('.friend')
+
+    let url_string = window.location.href
+    let url = new URL(url_string);
+    let ticketID = url.searchParams.get("ticket");
+    if (!ticketID) {
+        ticketID = friendList[0].dataset.serviceId
+    }
+
+
+    $(document).on({
+        ajaxStart: function () {
+            $("body").removeClass("loading");
+        },
+        ajaxStop: function () {
+            $("body").removeClass("loading");
+        }
+    });
+    $("#chat_form").on('submit', function (e) {
+        e.preventDefault()
+        let formData = $(this).serializeArray();
+        formData.push({
+            name: "ticketID",
+            value: ticketID,
+        });
+        $.ajax({
+            url: '{% url "sendChat" %}',
+            data: formData,
+            dataType: 'json',
+            type: 'post',
+            success: function (data) {
+                $('.empty-chat-txt').remove()
+                sentMessage = `<li class="right clearfix">
+                    <span class="chat-img">
+                        <img src="https://bootdey.com/img/Content/user_3.jpg" alt="User Avatar">
+                    </span>
+                    <div class="chat-body clearfix">
+                        <div class="header">
+                            <span class="primary-font">Me</span>
+                            <small class="text-muted date"><i class="fa fa-clock-o"></i>now</small>
+                        </div>
+                        <p>
+                            ${$("input[name='chat_field']").val()}
+                        </p>
+                    </div>
+                </li>`
+                $('.chat').prepend(sentMessage)
+                $('input[name=chat_field').val('')
+            }
+        });
+
+    });
+
+    function receiveData() {
+        $.ajax({
+            url: '{% url "receiveChat" %}',
+            data: {
+                csrfmiddlewaretoken: $('input[name="csrfmiddlewaretoken"').val(),
+                ticketID: ticketID,
+            },
+            dataType: 'json',
+            type: 'post',
+            success: function (data) {
+                if (data.messages.length > 0) {
+                    $('.empty-chat-txt').remove()
+                    data.messages.forEach(function (item) {
+                        sentMessage = `<li class="left clearfix">
+                            <span class="chat-img">
+                                <img src="https://bootdey.com/img/Content/user_3.jpg" alt="User Avatar">
+                            </span>
+                            <div class="chat-body clearfix">
+                                <div class="header">
+                                    <span class="primary-font">${data.receiver_name}</span>
+                                    <small class="text-muted date"><i class="fa fa-clock-o"></i>${timeAgo(item['sent_date'])}</small>
+                                </div>
+                                <p>
+                                    ${item['message']}
+                                </p>
+                            </div>
+                        </li>`
+                        $('.chat').prepend(sentMessage)
+                    })
+                }
+            }
+        })
+    }
+    setInterval(receiveData, 1000)
+    friendList.forEach(function (item) {
+        if (item.dataset.serviceId == ticketID)
+            item.parentNode.classList.add("active")
+    })
+</script>
+{% endblock script %}

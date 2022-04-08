@@ -1,0 +1,52 @@
+{% extends 'app_dashboard/base.html' %}
+{% load static %}
+{% load customtags %}
+{% block title %}Customer Review{% endblock title %}
+{% block content %}
+<div class="w-100 container-fluid mt-5">
+    <div class="card p-4 table-responsive">
+        <h2>Customer Review</h2>
+        <table class="table table-striped mt-3 text-center">
+            <thead>
+                <tr>
+                    <th scope="col">Service No.</th>
+                    <th scope="col">Title</th>
+                    <th scope="col">Date</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Review</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for list in service_closed_list %}
+                <tr data-service-id="{{list.id}}">
+                    <td>{{ list.servicereq_no }}</td>
+                    <td>{{ list.title }}</td>
+                    <td>{{ list.created_at|date:"d-m-Y" }}</td>
+                    <td>{{ list.status }}</td>
+                    <td>{% if list.id|reviewCheck %}<button type="button" class="btn btn-success btn-sm review"
+                            disabled="disabled">Reviewed</button>{% else %}<button type="button"
+                            class="btn btn-primary btn-sm review">Review</button>{% endif %}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Modal part start -->
+<form method="POST" class="invoice_form modal-form">
+    <h2>Customer Review Form</h2>
+    {% csrf_token %}
+    <h4 class="mb-4 text-muted">Service: <span id="serviceName"></span></h4>
+    <div class="mb-3">
+        {{ form.comment }}
+    </div>
+    <input type="hidden" name="service_id" value="">
+    <button type="submit" class="btn btn-primary">Submit</button>
+</form>
+<!-- Modal part end -->
+
+{% endblock content %}
+
+{% block script %}
+{% endblock script %}

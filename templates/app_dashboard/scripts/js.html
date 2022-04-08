@@ -1,0 +1,258 @@
+<script>
+    $("#id_service_category option:first").text('Please Select');
+</script>
+<script>
+    if ($('#msg_text_success').text() != '') {
+        tata.success('Success', $('#msg_text_success').text(), {
+            position: 'tr',
+            duration: 10000
+        })
+    } else if ($('#msg_text_error').text() != '') {
+        tata.error('Error', $('#msg_text_error').text(), {
+            position: 'tr',
+            duration: 10000
+        })
+    }
+</script>
+<script>
+    $(window).on('load', function () {
+        $('.preloader-container').fadeOut('slow')
+    })
+</script>
+<script>
+    $(document).on({
+        ajaxStart: function () {
+            $("body").addClass("loading");
+        },
+        ajaxStop: function () {
+            $("body").removeClass("loading");
+        }
+    });
+</script>
+<script>
+    // console.log(window.localStorage.getItem('sidebar_status'))
+    // if (window.localStorage.getItem('sidebar_status')) {
+    //     $('#sidebar').toggleClass('active');
+    //     $('#sidebarCollapse').toggleClass('active')
+
+    // }
+    // $('#sidebarCollapse').on('click', function () {
+    //     if (window.localStorage.getItem('sidebar_status')) {
+    //         $('#sidebar').toggleClass('active');
+    //         $(this).toggleClass('active')
+    //         window.localStorage.removeItem('sidebar_status');
+
+    //     } else {
+    //         window.localStorage.setItem("sidebar_status", "active");
+    //         $('#sidebar').toggleClass('active');
+    //         $(this).toggleClass('active')
+    //     }
+    // })
+    $('#sidebarCollapse').on('click', function () {
+        $('#sidebar').toggleClass('active');
+        $(this).toggleClass('active')
+    })
+
+    $(document).ready(function () {
+        var down = false;
+        $('#bell').click(function (e) {
+            $('#box').toggleClass('show');
+
+        });
+
+        $('.chat:first').addClass('show active')
+
+    });
+
+    let role = $(".user_role").attr('data-role');
+    notify_item = ''
+
+    function serviceNotifyFunc() {
+        $.ajax({
+            url: "{% url 'serviceNotify' %}",
+            data: {
+                csrfmiddlewaretoken: '{{ csrf_token }}',
+            },
+            dataType: 'json',
+            type: 'post',
+            success: function (data) {
+                // console.log(data);
+                $("#nCount").html(data.unassigned_qs.length);
+                data.unassigned_qs.forEach(element => {
+                    notify_item += `<div class="notifications-item">
+                <div class="text">
+                    <h5>${element.service_title}</h5>
+                    <div class="service-options" data-temp-service-id="${element.id}">
+                        <button class="btn btn-sm btn-primary service_info">View Details</button>
+                       <div>
+                         <button class="btn btn-sm btn-success service_accept">Accept</button>
+                         <button class="btn btn-sm btn-danger service_reject">Reject</button>
+                         </div>
+                    </div>
+                </div>
+            </div>`
+                });
+                $('.notifications-items').html(notify_item)
+                notify_item = ""
+            }
+        })
+    }
+    if (role == 'technician') {
+        serviceNotifyFunc()
+    }
+
+    if (role == 'technician') {
+        $(document).on('click', '.service_accept', function () {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You won't be able to revert this!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, Accept it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $('#box').removeClass('show');
+                    $.ajax({
+                        url: "{% url 'serviceAccept' %}",
+                        data: {
+                            csrfmiddlewaretoken: '{{ csrf_token }}',
+                            tempServiceId: $(this).parents('.service-options').attr(
+                                'data-temp-service-id'),
+                        },
+                        dataType: 'json',
+                        type: 'post',
+                        success: function (data) {
+                            if (data.status == 1) {
+                                serviceNotifyFunc()
+                                Swal.fire({
+                                    title: 'Assigned!',
+                                    text: `Your have been assigend as technician for this service.`,
+                                    icon: 'success',
+                                })
+                            }
+                        }
+                    })
+                }
+            })
+
+        })
+    }
+
+    if (role == 'technician') {
+        $(document).on('click', '.service_info', function () {
+            $.ajax({
+                url: "{% url 'serviceinfo' %}",
+                data: {
+                    csrfmiddlewaretoken: '{{ csrf_token }}',
+                    service_details_id: $(this).parents('.service-options').attr(
+                        'data-temp-service-id'),
+                },
+                dataType: 'json',
+                type: 'post',
+                success: function (data) {
+                    details_info = data.details_info;
+                    // console.log(details_info.date);
+                    Swal.fire({
+                        title: '<strong>Service Request Details</strong>',
+                        icon: 'info',
+                        html: `Create At <b>${details_info.date}</b> </br> <h5>Title: <b>${details_info.title}</b></h5>
+                                    <p><b>Priority:</b> <span>${details_info.priority}</span> <br> <b>Details:</b> ${details_info.details}</p>`,
+                    })
+                }
+            });
+        })
+    }
+
+    if (role == 'technician') {
+        $(document).on('click', '.service_reject', function () {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You won't be able to revert this!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, Reject it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $('#box').removeClass('show');
+                    $.ajax({
+                        url: "{% url 'servicereject' %}",
+                        data: {
+                            csrfmiddlewaretoken: '{{ csrf_token }}',
+                            tempServiceId: $(this).parents('.service-options').attr(
+                                'data-temp-service-id'),
+                        },
+                        dataType: 'json',
+                        type: 'post',
+                        success: function (data) {
+                            if (data.status == 1) {
+                                serviceNotifyFunc()
+                                Swal.fire({
+                                    title: 'Service Rejected!',
+                                    text: `Your have rejected this service.`,
+                                    icon: 'error',
+                                })
+                            }
+                        }
+                    });
+                }
+            })
+        })
+    }
+
+    if (role == 'customer') {
+        notify_item = '';
+        $.ajax({
+            url: "{% url 'customerNotify' %}",
+            data: {
+                csrfmiddlewaretoken: '{{ csrf_token }}',
+            },
+            dataType: 'json',
+            type: 'post',
+            success: function (data) {
+                info = data.techInfo;
+                $("#nCount").html(info.length);
+                info.forEach((items) => {
+                    notify_item += `<div class="notifications-item">
+                            <div class="text">
+                                <h4>${items.title} service assigned to ${items.name}</h4>
+                                <p>Technician Info: <span>Email: ${items.email} | Phone: ${items.phone}</span></p>
+                            </div>
+                        </div>`
+                });
+                $('.notifications-items').html(notify_item);
+                notify_item = "";
+            }
+        })
+    }
+
+
+
+    document.querySelector('#logout').addEventListener('click', function () {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, Logout!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.open("{% url 'logout' %}", "_self");
+            }
+        })
+    })
+
+
+    if (role == 'customer') {
+        $('#bell').on('click', function () {
+            setTimeout(function () {
+                $("#nCount").html('0');
+            }, 2000);
+        })
+    }
+</script>

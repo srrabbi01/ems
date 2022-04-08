@@ -1,0 +1,20 @@
+{% autoescape off %}
+
+A new service has been assigned.
+
+Service: [{{service_no}}] {{service_title}}
+
+Customer contact info,
+Name: {{customer_name}}
+Phone: {{customer_phone}}{% if customer_email %}
+Email: {{customer_email}}{% endif %}
+
+Technician contact info,
+Name: {{technician_name}}
+Phone: {{technician_phone}}{% if technician_email %}
+Email: {{technician_email}}{% endif %}
+
+Please check your account for more details.
+
+Sincerely,
+E-fix{% endautoescape %}

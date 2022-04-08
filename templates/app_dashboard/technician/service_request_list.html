@@ -1,0 +1,149 @@
+{% extends 'app_dashboard/base.html' %}
+{% load static %}
+{% load customtags %}
+{% block title %}Service Request List{% endblock title %}
+{% block content %}
+<div class="w-100 container-fluid mt-5">
+    <div class="card p-4 table-responsive ">
+        <h2 class="mb-4">Your Assined Service List</h2>
+        <hr>
+        <table id="table_data" class="table table-sm table-striped service_req_list" style="width:100%">
+            <thead>
+                <tr>
+                    <th>Service No</th>
+                    <th>Title</th>
+                    <th>priority</th>
+                    <th>Customer name</th>
+                    <th>Customer phone</th>
+                    <th>Customer email</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                    <th>Details</th>
+                    <th>Update</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for list in work_list %}
+                <tr>
+                    <td>{{ list.servicereq_no }}</td>
+                    <td>{{ list.title }}</td>
+                    <td>{{ list.priority }}</td>
+                    <td>{{ list.customer.userregistration.name }}</td>
+                    <td>{{ list.customer.userregistration.phone }}</td>
+                    <td>{{ list.customer.userregistration.email }}</td>
+                    <td class="date">{{ list.created_at|date:"d-m-Y" }}</td>
+                    <td>
+                        <div class="optionbox">
+                            <select class="form-select status filter_select" id="fselect" data-id="{{list.id}}"
+                                {% if list.status == 'Closed' or list.status == 'Cancelled' %} disabled {% endif %}>
+                                <option value='New' {% if list.status == 'New' %} selected {% endif %}>New</option>
+                                <option value='In Progress' {% if list.status == 'In Progress' %} selected {% endif %}>
+                                    In Progress</option>
+                                <option value='Waitting on Customer' {% if list.status == 'Waitting on Customer' %}
+                                    selected {% endif %}>Waitting on Customer</option>
+                                <option value='Fixed' {% if list.status == 'Fixed' %} selected {% endif %}>Fixed
+                                </option>
+                                <option value='Closed' {% if list.status == 'Closed' %} selected {% endif %}>Closed
+                                </option>
+                                <option value='Cancelled' {% if list.status == 'Cancelled' %} selected {% endif %}>
+                                    Cancelled</option>
+                            </select>
+                        </div>
+                    </td>
+                    <td><a href="{% url 'details_service' pk=list.id %}" class="btn btn-info btn-sm">Details</a>
+                    </td>
+                    <td><button class="btn btn-success btn-sm update_btn"
+                            {% if list.status == 'Closed' or list.status == 'Cancelled' %} disabled
+                            {% endif %}>Update</button></td>
+                </tr>
+                {% endfor %}
+            <tfoot>
+                <tr>
+                    <th>Service No</th>
+                    <th>Title</th>
+                    <th>priority</th>
+                    <th>Customer name</th>
+                    <th>Customer phone</th>
+                    <th>Customer email</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                    <th>Details</th>
+                    <th>Update</th>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+</div>
+
+<form method="POST" class="invoice_form modal-form" enctype="multipart/form-data">
+    <h2>Invoice Form</h2>
+    {% csrf_token %}
+    <div class="mb-3">
+        {{ invoiceform.details }}
+    </div>
+    <div class="mb-3">
+        {{ invoiceform.equip_charge }}
+        <div id="emailHelp" class="form-text text-white">If you used any parts or equipments then fill-up this
+            feild.
+        </div>
+    </div>
+
+    <div class="mb-3">
+        {{invoiceform.files}}
+        <label class="label--desc filelabel" id="filelabel">Maximum upload file size: 5MB</label>
+        {{invoiceform.files.errors}}
+    </div>
+    <button type="submit" class="btn btn-primary">Submit</button>
+</form>
+
+
+{% endblock content %}
+
+{% block script %}
+<script>
+    $(document).ready(function () {
+        $('.update_btn').on('click', function () {
+            var select = $(this).closest('tr').find('select.status')
+            var status = select.val();
+            var id = select.data('id');
+            if (status === 'Closed') {
+                $('.invoice_form').append(
+                    `<input type="password" id="service_id" name="service_id" value=${id} hidden><input type="password" name="curr_status" value=${status} hidden>`
+                )
+                $.featherlight('.modal-form');
+            } else {
+                $.ajax({
+                    type: "GET",
+                    url: "{% url 'satusUpdate' %}",
+                    data: {
+                        status: status,
+                        id: id
+                    },
+                    success: function (data) {
+                        var status = data.status
+                        if (status == 'null') {
+                            tata.info('Alert',
+                                `No Changes Detected for: ${data.service_no}`, {
+                                    position: 'tr',
+                                    duration: 3000
+                                })
+                        } else if (status === 1) {
+                            tata.success('Success',
+                                `Status updated for: ${data.service_no}`, {
+                                    position: 'tr',
+                                    duration: 5000
+                                })
+                        } else {
+                            tata.error('Error', 'An error occured when updating status', {
+                                position: 'tr',
+                                duration: 5000
+                            })
+                        }
+                    }
+                })
+            }
+        });
+    });
+</script>
+
+{% endblock script %}

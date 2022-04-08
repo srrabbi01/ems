@@ -1,0 +1,113 @@
+{% extends 'app_dashboard/base.html' %}
+{% load static %}
+{% load customtags %}
+{% block title %}Service Request List{% endblock title %}
+{% block content %}
+<div class="container-fluid p-md-4 mt-5">
+    <div class="row info-container-1">
+        <div class="col-md-4">
+            <div class="card card-1">
+                <h6> Total paid</h6>
+                <h3 class="f-w-600 text-c-green">{{total|sub2var:totalDue|stringformat:".2f"}}Tk</h3>
+                <p class="mb-0">May 23 - June 01 (2017)</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card card-2 {% if totalDue %} card-danger {% endif %}">
+
+                <h6>Total Due</h6>
+                <h3 class="f-w-600 text-c-yellow">{{totalDue|stringformat:".2f"}}Tk</h3>
+                <p class="mb-0">May 23 - June 01 (2017)</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card card-3">
+                <h6>Grand Total Cost</h6>
+                <h3 class="f-w-600 text-c-blue">{{total}}Tk</h3>
+                <p class="mb-0">May 23 - June 01 (2017)</p>
+            </div>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-body">
+            <h5 class="header-title pb-3 mt-0">Payments</h5>
+            <div class="table-responsive py-2">
+                <table class="table table-hover mb-0 table-sm text-center" id="paymnets-table">
+                    <thead>
+                        <tr class="align-self-center">
+                            <th>Invoice ID</th>
+                            <th>Service Name</th>
+                            <th>Package</th>
+                            <th>Priority</th>
+                            <th>Payment Type</th>
+                            <th>Paid Date</th>
+                            <th>Total Amount</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for invoice in invoice_qs %}
+                        <tr data-invoice-id="{{invoice.id}}">
+                            <td>#{{invoice.id}}</td>
+                            <td>{{invoice.service.title}}</td>
+                            <td>{{invoice.service.service_category}}</td>
+                            <td>{{invoice.service.priority}}</td>
+                            <td>{{invoice.customerpayment.payment_method|default:"-"}}</td>
+                            <td>{{invoice.customerpayment.payment_date|default:"-"}}</td>
+                            <td>{{invoice.getTotalCharge}}</td>
+                            <td>
+                                {% if invoice.customerpayment and invoice.customerpayment.paid == False %}
+                                <span class="badge badge-boxed badge-soft-warning">Pending</span>
+                                {% elif invoice.paid and invoice.customerpayment.paid == True %}
+                                <span class="badge badge-boxed badge-soft-primary">Paid</span>
+                                {% else %}
+                                <button class="btn btn-success btn-sm pay" data-featherlight="#modalForm">Pay</button>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <!--end table-responsive-->
+            <div class="pt-3 border-top text-right"><a href="#" class="text-primary">View all <i
+                        class="mdi mdi-arrow-right"></i></a></div>
+        </div>
+    </div>
+    <form action="" class="invoice_form modal-form" id="modalForm" method="post">
+        {% csrf_token %}
+        <h2 class="mb-2">Payment of Invoice ID #<span id="invoiceID">000</span></h2>
+        <h4 class="mb-4 text-muted">Service: <span id="serviceName"></span></h4>
+        <div class="mb-3">
+            <label>Transition id</label>
+            {{form.transition_id}}
+        </div>
+        <div class="mb-3">
+            <label>Payment method</label>
+            {{form.payment_method}}
+        </div>
+        <div class="mb-3">
+            <label>Payment date</label>
+            {{form.payment_date}}
+        </div>
+        <input type="hidden" name="invoiceID" value="">
+        <button type="submit" class="btn btn-primary mt-4">Submit</button>
+    </form>
+
+</div>
+{% endblock content %}
+
+{% block script %}
+<script>
+    $(document).ready(function () {
+        $('#paymnets-table').DataTable();
+    });
+
+    $('.pay').on('click', function () {
+        parentTr = $(this).closest('tr')
+        $('#invoiceID').text(parentTr.attr('data-invoice-id'))
+        $('input[name="invoiceID"]').val(parentTr.attr('data-invoice-id'))
+        $('#serviceName').text(parentTr.children('td')[1].textContent)
+    })
+</script>
+{% endblock script %}

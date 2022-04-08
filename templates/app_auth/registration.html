@@ -1,0 +1,291 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <!-- Required meta tags-->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="shortcut icon" type="image/jpg" href="{% static 'images/favicon.png' %}" />
+
+    <!-- <meta name="description" content="Colorlib Templates">
+    <meta name="author" content="Colorlib">
+    <meta name="keywords" content="Colorlib Templates"> -->
+
+    <!-- Title Page-->
+    <title>E-Fix - Registration</title>
+
+    <!-- Icons font CSS-->
+    <link href="{% static 'vendor/mdi-font/css/material-design-iconic-font.min.css' %}" rel="stylesheet" media="all">
+    <link href="{% static 'vendor/font-awesome-4.7/css/font-awesome.min.css' %}" rel="stylesheet" media="all">
+    <!-- Font special for pages-->
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i,800,800i"
+        rel="stylesheet">
+
+    <!-- Vendor CSS-->
+    <link href="{% static 'vendor/select2/select2.min.css' %}" rel="stylesheet" media="all">
+    <link href="{% static 'vendor/datepicker/daterangepicker.css' %}" rel="stylesheet" media="all">
+
+    <!-- Main CSS-->
+
+    <!-- Map Style, Links and Js Files -->
+    <script src='https://unpkg.com/@turf/turf/turf.min.js'></script>
+    <script src='https://api.mapbox.com/mapbox-gl-js/v1.11.0/mapbox-gl.js'></script>
+    <link href='https://api.mapbox.com/mapbox-gl-js/v1.11.0/mapbox-gl.css' rel='stylesheet' />
+    <script src='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.7.0/mapbox-gl-geocoder.min.js'>
+    </script>
+    <link rel='stylesheet'
+        href='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.7.0/mapbox-gl-geocoder.css'
+        type='text/css' />
+    <link href="{% static 'app_auth/css/registration.css' %}" rel="stylesheet" media="all">
+
+</head>
+
+<body>
+    {% include 'preloader.html' %}
+    <div class="page-wrapper bg-shape-01">
+        <div class="wrapper wrapper--w1250">
+            <div class="card card-5">
+                <div class="card-heading">
+                    <h2 class="title">EMS Registration Form</h2>
+                </div>
+                <div class="card-body">
+                    <form method="POST" enctype="multipart/form-data" class="w-100">
+                        {% csrf_token %}
+                        <div class="row p-0">
+                            <div class="col-md-4 col-12">
+                                <div class="form-row">
+                                    <div class="name">Name<sup style="color: red;">*</sup></div>
+                                    <div class="value">
+                                        <div class="input-group-desc">
+                                            {{form.name}}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="name">Email</div>
+                                    <div class="value">
+                                        <div class="input-group">
+                                            {{form.email}}
+                                            <label class="label--desc emailwarn"></label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="name">Phone<sup style="color: red;">*</sup></div>
+                                    <div class="value">
+                                        <div class="row row-space"></div>
+                                        <div class="input-group-desc">
+                                            {{form.phone}}
+                                            <label class="label--desc phonewarn"></label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="name">Password<sup style="color: red;">*</sup></div>
+                                    <div class="value">
+                                        <div class="input-group-desc">
+                                            {{userform.password1}}
+                                            <p class="text-muted">Your password can’t be too similar to
+                                                your
+                                                other personal
+                                                information.Your password must contain at least 8 characters.Your
+                                                password
+                                                can’t
+                                                be a commonly used password.Your password can’t be entirely numeric.</p>
+                                            {{ userform.password1.errors }}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="name">Confirm Password<sup style="color: red;">*</sup></div>
+                                    <div class="value">
+                                        <div class="input-group-desc">
+                                            {{userform.password2}}
+                                            <p class="text-muted">Enter the same password as before, for
+                                                verification.</p>
+                                            {{ userform.password2.errors }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Extra Map Work Start -->
+                            <div class="form-row col-md-8 col-12">
+                                <div class="name">Select Location<sup style="color: red;">*</sup></div>
+                                <div id='map'></div>
+                                {{form.location}}
+                                <a class="btn btn--radius-2 btn--red locate-btn" onclick="getCurrentLocFunc()">Locate
+                                    Me</a>
+                            </div>
+                        </div>
+                        <!-- Extra Map Work End -->
+                        <div class="row">
+                            <div class="form-row col-md-12 m-b-0 ">
+                                <label class="label label--block">Already have an account ? <a
+                                        href="{% url 'login' %}">Login</a></label>
+                            </div>
+                            <div>
+                                <button class="btn btn--radius-2 btn--blue" type="submit"
+                                    id="register">Register</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Jquery JS-->
+    <script src="{% static 'vendor/jquery/jquery.min.js' %}"></script>
+
+
+    <!-- Map JS Start -->
+    {% include 'app_dashboard/scripts/mapjs.html' %}
+    <script>
+        locInpField = document.querySelector('#id_location')
+        locInpField.setAttribute("type", "hidden");
+        map.on('load', function () {
+            map.on('click', function (e) {
+                if (previous_Marker) {
+                    console.log(previous_Marker)
+                    previous_Marker.remove()
+                }
+                locInpField.value = `${e.lngLat.lat},${e.lngLat.lng}`;
+                let marker = new mapboxgl.Marker({
+                        color: 'green',
+                        scale: 0.9
+                    })
+                    .setLngLat([e.lngLat.lng, e.lngLat.lat])
+                    .addTo(map);
+                previous_Marker = marker
+
+            });
+            getCurrentLocFunc()
+        })
+    </script>
+    <!-- Map JS End -->
+
+
+
+
+
+    <!-- Vendor JS-->
+    <script src="{% static 'vendor/select2/select2.min.js' %}"></script>
+    <script src="{% static 'vendor/datepicker/moment.min.js' %}"></script>
+    <script src="{% static 'vendor/datepicker/daterangepicker.js' %}"></script>
+
+    <!-- Main JS-->
+    <script src="{% static 'app_auth/js/global.js' %}"></script>
+
+    <script>
+        $('#id_username').addClass('input--style-5')
+        $('#id_username').removeAttr('required')
+        $('#id_password1').addClass('input--style-5')
+        $('#id_password2').addClass('input--style-5')
+
+        $('#id_registration_type').on('change', function () {
+            if ($(this).val() == 'Commercial') {
+                $('input[name="business_name"]').attr('required', 'required')
+                $('.required').html('(Required)')
+            } else {
+                $('input[name="business_name"]').removeAttr('required');
+                $('.required').html('(Optional)')
+            }
+        })
+
+        selectOptions = ''
+        $("#id_email").on('keyup', function () {
+            let email = "{{customer_info.email}}"
+            let emailName = $(this).val();
+            if ((emailName.length > 2) && (emailName.indexOf(".") >= 0) && (email.indexOf(emailName) < 0)) {
+                dataDict = {
+                    'csrfmiddlewaretoken': $("input[name=csrfmiddlewaretoken]").val(),
+                    'emailName': emailName
+                }
+                $.ajax({
+                    type: 'POST',
+                    url: '{% url "getEmail" %}',
+                    data: dataDict,
+                    success: function (data) {
+                        if (data.status == 1) {
+                            $('#id_email').addClass('errorfield')
+                            $(".emailwarn").html('Email already exist please try another email!');
+                            $(".emailwarn").addClass('errorlabel');
+                            $("#register").addClass('disabled');
+                        } else if ($('#id_phone').hasClass('errorfield')) {
+                            $('#id_email').removeClass('errorfield')
+                            $(".emailwarn").html('Enter email');
+                            $(".emailwarn").removeClass('errorlabel');
+                        } else {
+                            $('#id_email').removeClass('errorfield')
+                            $(".emailwarn").html('Enter email');
+                            $(".emailwarn").removeClass('errorlabel');
+                            $("#register").removeClass('disabled');
+                        }
+                    }
+                });
+            } else if ($('#id_phone').hasClass('errorfield')) {
+                $('#id_email').removeClass('errorfield')
+                $(".emailwarn").html('Enter email');
+                $(".emailwarn").removeClass('errorlabel');
+            } else {
+                $('#id_email').removeClass('errorfield')
+                $(".emailwarn").html('Enter email');
+                $(".emailwarn").removeClass('errorlabel');
+                $("#register").removeClass('disabled');
+            }
+        });
+
+
+
+        $("#id_phone").on('keyup', function () {
+            let phone = "{{customer_info.phone}}"
+            let phoneNum = $(this).val();
+            if ((phone.indexOf(phoneNum) < 0) && (phoneNum.length > 6)) {
+                dataDict = {
+                    'csrfmiddlewaretoken': $("input[name=csrfmiddlewaretoken]").val(),
+                    'phoneNum': phoneNum
+                }
+                $.ajax({
+                    type: 'POST',
+                    url: '{% url "getPhone" %}',
+                    data: dataDict,
+                    success: function (data) {
+                        if (data.status == 1) {
+                            $('#id_phone').addClass('errorfield')
+                            $(".phonewarn").html('Phone Number already exist please try another!');
+                            $(".phonewarn").addClass('errorlabel');
+                            $("#register").addClass('disabled');
+                        } else if ($('#id_email').hasClass('errorfield')) {
+                            $('#id_phone').removeClass('errorfield')
+                            $(".phonewarn").html('Primary');
+                            $(".phonewarn").removeClass('errorlabel');
+                        } else {
+                            $('#id_phone').removeClass('errorfield')
+                            $(".phonewarn").html('Primary');
+                            $(".phonewarn").removeClass('errorlabel');
+                            $("#register").removeClass('disabled');
+                        }
+                    }
+                });
+            } else if ($('#id_email').hasClass('errorfield')) {
+                $('#id_phone').removeClass('errorfield')
+                $(".phonewarn").html('Primary');
+                $(".phonewarn").removeClass('errorlabel');
+            } else {
+                $('#id_phone').removeClass('errorfield')
+                $(".phonewarn").html('Primary');
+                $(".phonewarn").removeClass('errorlabel');
+                $("#register").removeClass('disabled');
+            }
+        });
+
+        $(window).on('load', function () {
+            $('.preloader-container').fadeOut('slow')
+        })
+    </script>
+
+</body>
+
+</html>
+<!-- end document-->

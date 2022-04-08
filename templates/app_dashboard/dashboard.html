@@ -1,0 +1,196 @@
+{% extends 'app_dashboard/base.html' %}
+{% load static %}
+{% load customtags %}
+{% block title %}Dashboard{% endblock title %}
+{% block content %}
+
+<div class="container-fluid pt-3 h-100">
+    <div class="row text-white info-container-1 mt-2">
+        <div class="col-8">
+            <h3 class="m-0 text-white">Dashboard</h3>
+            <div class="breadcrams">
+                <small>Main</small><small>></small><small>home</small><small>></small><small>dashboard</small>
+            </div>
+
+        </div>
+        {% if userRole == 'customer' %}
+        <div class="col-4 d-grid gap-2 d-md-flex justify-content-md-end align-items-center">
+            <a href="{% url 'create_service' %}" class="white_btn3">Create Service</a>
+        </div>
+        {% endif %}
+    </div>
+    <div class="col-xl-12 mt-3">
+        <div class="card proj-progress-card">
+            <div class="card-block">
+                <div class="row">
+                    <div class="col-xl-3 col-md-6 mb-md-0 mb-3">
+                        <h6>Total Request</h6>
+                        <h5 class="m-b-30 f-w-600">{{totalServices}}<span class="text-c-green m-l-10">100%</span></h5>
+                        <div class="progress">
+                            <div class="progress-bar bg-c-red" style="width:100%"></div>
+                        </div>
+                    </div>
+                    <div class="col-xl-3 col-md-6 mb-md-0 mb-3">
+                        <h6>Completed Request</h6>
+                        <h5 class="m-b-30 f-w-600">{{completedServices}}<span
+                                class="text-c-red m-l-10">{{ completedServices|getPercent:totalServices }}%</span>
+                        </h5>
+                        <div class="progress">
+                            <div class="progress-bar bg-c-blue"
+                                style="width:{{ completedServices|getPercent:totalServices }}%"></div>
+                        </div>
+                    </div>
+                    <div class="col-xl-3 col-md-6 mb-md-0 mb-3">
+                        <h6>Remaining Request</h6>
+                        <h5 class="m-b-30 f-w-600">{{remainingServices}}<span
+                                class="text-c-green m-l-10">{{remainingServices|getPercent:totalServices}}%</span>
+                        </h5>
+                        <div class="progress">
+                            <div class="progress-bar bg-c-green"
+                                style="width:{{remainingServices|getPercent:totalServices}}%"></div>
+                        </div>
+                    </div>
+                    <div class="col-xl-3 col-md-6 mb-md-0 mb-3">
+                        <h6>Cancelled Request</h6>
+                        <h5 class="m-b-30 f-w-600">{{cancelledServices}}<span
+                                class="text-c-green m-l-10">{{cancelledServices|getPercent:totalServices}}%</span>
+                        </h5>
+                        <div class="progress">
+                            <div class="progress-bar bg-c-yellow"
+                                style="width:{{cancelledServices|getPercent:totalServices}}%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% if userRole == 'technician' %}
+    <div class="row info-container-1 mt-4">
+        <div class="col-md-4">
+            <div class="card card-1">
+                <h6> Total Equipment Cost-</h6>
+                <h3 class="f-w-600 text-c-green">{{totalDue|stringformat:".2f"}}</h3>
+                <p class="m-b-0">May 23 - June 01 (2017)</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card card-2">
+
+                <h6>Total Technician Charge-</h6>
+                <h3 class="f-w-600 text-c-yellow">{{tech_total_charge|stringformat:".2f"}}</h3>
+                <p class="m-b-0">May 23 - June 01 (2017)</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card card-3">
+                <h6>Total-</h6>
+                <h3 class="f-w-600 text-c-blue">
+                    {{equip_total_charge|add2var:tech_total_charge|stringformat:".2f"}}</h3>
+                <p class="m-b-0">May 23 - June 01 (2017)</p>
+            </div>
+        </div>
+    </div>
+    {% elif userRole == 'customer' %}
+    <div class="row info-container-1">
+        <div class="col-md-4">
+            <div class="card card-1">
+                <h6> Total paid</h6>
+                <h3 class="f-w-600 text-c-green">{{total|sub2var:totalDue|stringformat:".2f"}}Tk</h3>
+                <p class="mb-0">May 23 - June 01 (2017)</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card card-2 {% if totalDue %} card-danger {% endif %}">
+                <h6>Total Due</h6>
+                <h3 class="f-w-600 text-c-yellow">{{totalDue|stringformat:".2f"}}Tk</h3>
+                <p class="mb-0">May 23 - June 01 (2017)</p>
+
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card card-3">
+                <h6>Grand Total Cost</h6>
+                <h3 class="f-w-600 text-c-blue">{{total}}Tk</h3>
+                <p class="mb-0">May 23 - June 01 (2017)</p>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    <div class="row chart-container">
+        <div class="col-12 col-lg-4 mb-lg-0 mb-4">
+            <div id="chart2" class="h-100 card"></div>
+        </div>
+        <div class="col-12 col-lg-8  mb-lg-0 mb-4">
+            <div id="chart1" class="h-100 card"></div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}
+{% block script %}
+<script>
+    var options1 = {
+        series: [{
+            name: 'series',
+            data: [31, 40, 28, 51, 42, 109, 100]
+        }],
+        chart: {
+            type: 'area',
+            height: 350,
+        },
+        dataLabels: {
+            enabled: false
+        },
+        stroke: {
+            curve: 'straight'
+        },
+        xaxis: {
+            type: 'datetime',
+            categories: ["2018-09-19T00:00:00.000Z", "2018-09-19T01:30:00.000Z", "2018-09-19T02:30:00.000Z",
+                "2018-09-19T03:30:00.000Z", "2018-09-19T04:30:00.000Z", "2018-09-19T05:30:00.000Z",
+                "2018-09-19T06:30:00.000Z"
+            ]
+        },
+        tooltip: {
+            x: {
+                format: 'dd/MM/yy HH:mm'
+            },
+        },
+    };
+
+    var chart1 = new ApexCharts(document.querySelector("#chart1"), options1);
+    chart1.render();
+
+
+
+
+
+
+    var options2 = {
+        series: [{
+            data: [470, 540, 580, 690, 1100, 1200, 1380]
+        }],
+        chart: {
+            type: 'bar',
+            height: 350,
+        },
+        plotOptions: {
+            bar: {
+                borderRadius: 4,
+                horizontal: true,
+            }
+        },
+        dataLabels: {
+            enabled: false
+        },
+        xaxis: {
+            categories: ['Netherlands', 'Italy', 'France', 'Japan',
+                'United States', 'China', 'Germany'
+            ],
+        }
+    };
+
+    var chart2 = new ApexCharts(document.querySelector("#chart2"), options2);
+    chart2.render();
+</script>
+{% endblock script %}

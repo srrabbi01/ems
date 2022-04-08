@@ -1,0 +1,9 @@
+asgiref==3.5.0
+Django==3.2.9
+geographiclib==1.52
+geopy==2.2.0
+Pillow==9.1.0
+pytz==2022.1
+six==1.16.0
+sqlparse==0.4.2
+whitenoise==6.0.0

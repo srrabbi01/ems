@@ -1,0 +1,52 @@
+{% extends 'app_dashboard/base.html' %}
+{% load static %}
+{% load customtags %}
+{% block title %}Create Service Request{% endblock title %}
+{% block content %}
+<div class="container-fluid mt-5">
+    <div class="card map-container">
+        <div id='map'></div>
+
+        {% include 'app_dashboard/scripts/mapjs.html' %}
+        <script>
+            userLoc = '{{request.user.userregistration.location}}'
+            map.on('load', function () {
+                // getCurrentLocFunc()
+                fetch('{% url "map_api" %}')
+                    .then(response => response.json())
+                    .then(data => {
+                        nShops = data.shops
+                        data.technician_list.forEach(element => {
+                            tloc = element.location.split(',').reverse()
+                            popup = new mapboxgl.Popup()
+                                .setText('Technician')
+                                .addTo(map);
+                            var marker = new mapboxgl.Marker({
+                                    color: '#0d6efd'
+                                })
+                                .setLngLat(tloc)
+                                .addTo(map)
+                                .setPopup(popup);
+                        });
+
+                    })
+
+                if (userLoc) {
+                    tloc = userLoc.split(',').reverse()
+                    let marker = new mapboxgl.Marker({
+                            color: 'red',
+                            scale: 0.9
+                        })
+                        .setLngLat(tloc)
+                        .addTo(map);
+                    previous_Marker = marker
+                    map.flyTo({
+                        center: tloc,
+                    });
+                } else
+                    getCurrentLocFunc()
+            })
+        </script>
+    </div>
+</div>
+{% endblock content %}

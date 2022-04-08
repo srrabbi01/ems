@@ -1,0 +1,63 @@
+<script>
+    mapboxgl.accessToken =
+        'pk.eyJ1Ijoic3JhYmJpIiwiYSI6ImNrcG96cXhkcjAyaHAyb2s5MGZib3JydGMifQ.VvzeD_NW9jIYo3kjT2ANdw';
+    let previous_Marker
+    let locOptions = {
+        maximumAge: 10000,
+        timeout: 5000,
+        enableHighAccuracy: true
+    };
+    let locInpField = null
+
+
+    let map = new mapboxgl.Map({
+        container: 'map',
+        style: 'mapbox://styles/mapbox/streets-v11',
+        zoom: 15,
+    });
+
+    let geocoder = new MapboxGeocoder({
+        accessToken: mapboxgl.accessToken,
+        mapboxgl: mapboxgl,
+        marker: true,
+        placeholder: 'Search for places ...',
+
+    });
+
+    map.addControl(geocoder);
+
+    function error(err) {
+        console.warn(`ERROR(${err.code}): ${err.message}`);
+    }
+
+    function getCurrentLocFunc() {
+        let clat, clong
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(function (position) {
+                clat = position.coords.latitude
+                clng = position.coords.longitude
+                if (locInpField)
+                    locInpField.value = `${clat},${clng}`;
+                if (previous_Marker) {
+                    previous_Marker.remove()
+                }
+                let marker = new mapboxgl.Marker({
+                        color: 'red',
+                        scale: 1.00,
+                    })
+                    .setLngLat([clng, clat])
+                    .addTo(map);
+                previous_Marker = marker
+                map.flyTo({
+                    center: [clng, clat]
+                });
+            }, error, locOptions);
+
+
+        } else {
+            alert("Sorry, your browser does not support HTML5 geolocation.");
+        }
+    }
+    map.addControl(new mapboxgl.NavigationControl());
+    map.addControl(new mapboxgl.GeolocateControl({}));
+</script>
