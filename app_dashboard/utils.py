@@ -40,7 +40,7 @@ def accountCreatedNotifyMailFunc(obj):
 
 def activateAccountMailFunc(obj):
     subject = 'Account Activation'
-    message = f'Hi {obj.name}, Your E-Fix account has been activated. You can got to https://efixbd.com and use your account now. Thank you.'
+    message = f'Hi {obj.name}, Your Ems account has been activated. You can got to https://efixbd.com and use your account now. Thank you.'
     email_from = settings.DEFAULT_FROM_EMAIL
     recipient_list = [obj.email, ]
     send_mail( subject, message, email_from, recipient_list )
@@ -100,7 +100,7 @@ def serviceInvoiceMail(obj):
     subject = f'Invoice for {obj.service.servicereq_no}-{obj.service.title}'
     c = {
         # 'domain':'127.0.0.1:8000',
-        'domain':'efixbd.com',
+        'domain':'ems.excellentworld.xyz',
         'protocol': 'https',
         # 'protocol': 'http',
         'id':obj.id,

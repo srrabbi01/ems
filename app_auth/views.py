@@ -99,8 +99,8 @@ def password_reset_request(request):
                     c = {
                         "email":user.email,
                         # 'domain':'127.0.0.1:8000',
-                        'domain':'efixbd.com',
-                        'site_name': 'E-Fix',
+                        'domain':'ems.excellentworld.xyz',
+                        'site_name': 'Ems',
                         "uid": urlsafe_base64_encode(force_bytes(user.pk)),
                         'token': default_token_generator.make_token(user),
                         'protocol': 'https',

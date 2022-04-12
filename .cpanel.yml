@@ -1,0 +1,6 @@
+---
+deployment:
+  tasks:
+    - export DEPLOYPATH=/home/excellen/emsfiles/
+    - /bin/cp -r * $DEPLOYPATH
+    

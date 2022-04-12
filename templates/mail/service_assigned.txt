@@ -17,4 +17,4 @@ Email: {{technician_email}}{% endif %}
 Please check your account for more details.
 
 Sincerely,
-E-fix{% endautoescape %}
+Ems{% endautoescape %}

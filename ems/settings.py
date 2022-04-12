@@ -13,7 +13,7 @@ SECRET_KEY = 'django-insecure-)%+s+4!d-gevfk*z+hi_(e@2#yjizg94=0!veh0#8@h2x-@0br
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['127.0.0.1','*']
 
 
 # Application definition
@@ -131,15 +131,13 @@ else:
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
-EMAIL_HOST = 'mail.demo.excellentworld.xyz'
-EMAIL_HOST_USER = 'ems@demo.excellentworld.xyz'
+EMAIL_HOST = 'mail.excellentworld.xyz'
+EMAIL_HOST_USER = 'info@ems.excellentworld.xyz'
 EMAIL_HOST_PASSWORD = 'SJ!20v.1vE3vuH'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False
-DEFAULT_FROM_EMAIL = 'no replay <ems@demo.excellentworld.xyz>'
-
-
+DEFAULT_FROM_EMAIL = 'Ems <info@ems.excellentworld.xyz>'
 
 
 JET_THEMES = [
@@ -181,7 +179,7 @@ X_FRAME_OPTIONS = 'SAMEORIGIN'
 
 
 JET_SIDE_MENU_ITEMS = [  # A list of application or custom item dicts
-    {'label': ('E-Fix Functionality'), 'items': [
+    {'label': ('Ems Functionality'), 'items': [
         {'name': 'app_dashboard.userregistration','label': ('Created Accounts')},
         {'name': 'app_dashboard.servicecategory','label': ('Cost Category')},
         {'name': 'app_dashboard.servicerequest','label': ('Requested Services')},
