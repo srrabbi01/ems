@@ -47,29 +47,29 @@
                     {% for message in messages %}
                     {% if message.tags == 'error' %}
                     <p style="color: red;">{{ message }}<p>
-                            {% endif %}
-                            {% endfor %}
-                            {% endif %}
+                    {% endif %}
+                    {% endfor %}
+                    {% endif %}
 
-                            <div class="container-login100-form-btn">
-                                <div class="wrap-login100-form-btn">
-                                    <div class="login100-form-bgbtn"></div>
-                                    <button class="login100-form-btn">
-                                        Login
-                                    </button>
-                                </div>
+                    <div class="container-login100-form-btn">
+                        <div class="wrap-login100-form-btn">
+                            <div class="login100-form-bgbtn"></div>
+                                <button class="login100-form-btn">
+                                    Login
+                                </button>
                             </div>
+                        </div>
 
-                            <div class="text-center p-t-50">
-                                <a class="txt2" href="{% url 'password_reset' %}">
-                                    Forgote Password? Reset
-                                </a>
-                            </div>
-                            <div class="text-center">
-                                <a class="txt2" href="{% url 'registration' %}">
-                                    Don’t have an account? Sign Up
-                                </a>
-                            </div>
+                        <div class="text-center p-t-50">
+                            <a class="txt2" href="{% url 'password_reset' %}">
+                                Forgote Password? Reset
+                            </a>
+                        </div>
+                        <div class="text-center">
+                            <a class="txt2" href="{% url 'registration' %}">
+                                Don’t have an account? Sign Up
+                        </a>
+                    </div>
                 </form>
             </div>
         </div>
